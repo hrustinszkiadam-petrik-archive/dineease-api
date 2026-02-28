@@ -1,0 +1,299 @@
+openapi: 3.0.0
+info:
+  title: DineEase Backend API
+  version: 1.0.0
+  description: API for managing DineEase service data for the admin and web applications.
+servers:
+  - url: http://competitor-YYYY-module-a.dineease.com/api/v1
+    description: Base URL for API endpoints (Replace YYYY with your four-digit pin)
+
+paths:
+  /users:
+    get:
+      summary: Get brief data of all users
+      responses:
+        '200':
+          description: An array of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserBrief'
+
+  /users/{id}:
+    get:
+      summary: Get detailed information about a selected user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detailed user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailed'
+        '404':
+          description: User with the requested id cannot be found
+          content:
+            application/json: 
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User not found
+    put:
+      summary: Disable or activate a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: User activation status updated
+          
+  /restaurants:
+    get:
+      summary: Get brief data of all restaurants with average rating
+      responses:
+        '200':
+          description: An array of restaurants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Restaurant'
+  /plans:
+    get:
+      summary: Get the data of all plans
+      responses:
+        '200':
+          description: An array of subscription plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+  /plans/{id}:
+    put:
+      summary: Update a selected plan
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanUpdate'
+      responses:
+        '200':
+          description: Plan updated
+
+  /roles:
+    get:
+      summary: Get the data of all roles
+      responses:
+        '200':
+          description: An array of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+
+  /reviews:
+    get:
+      summary: Get all reviews with brief restaurant data
+      responses:
+        '200':
+          description: An array of reviews with restaurant data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+
+  /reviews/{id}:
+    delete:
+      summary: Delete a selected review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Review deleted
+
+  /registration:
+    post:
+      summary: Register a new restaurant owner with restaurants and subscription plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+      responses:
+        '201':
+          description: User, restaurants, and plan created
+  /reset-db:
+    post:
+      summary: Reset DB
+      responses:
+        '201':
+          description: Done
+
+
+components:
+  schemas:
+    UserBrief:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        isActive:
+          type: boolean
+    UserDetailed:
+      allOf:
+        - $ref: '#/components/schemas/UserBrief'
+        - type: object
+          properties:
+            roleId:
+              type: integer
+            planId:
+              type: integer
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        city:
+          type: string
+        cuisine: 
+          type: string
+        address: 
+          type: string
+        zipCode:
+          type: string
+        countryCode:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        rating:
+          type: number
+    Plan:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        monthlyFee:
+          type: number
+        yearlyFee:
+          type: number
+        maxNumberOfRestaurants:
+          type: integer          
+        description:
+          type: string
+    PlanUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        monthlyFee:
+          type: number
+        yearlyFee:
+          type: number
+        maxNumberOfRestaurants:
+          type: integer
+        description:
+          type: string
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+        restaurantId:
+          type: integer
+        name:
+          type: string
+        rating:
+          type: number
+        comment:
+          type: string
+    Registration:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        planId:
+          type: integer
+        restaurants:
+          type: array
+          items: 
+            type: object
+            properties:
+              name:
+                type: string
+              city:
+                type: string
+              cuisine:
+                type: string
+              address:
+                type: string
+              zipCode:
+                type: string
+              countryCode:
+                type: string
